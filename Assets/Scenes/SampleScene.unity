@@ -176,6 +176,7 @@ GameObject:
   - component: {fileID: 121673477}
   - component: {fileID: 121673476}
   - component: {fileID: 121673475}
+  - component: {fileID: 171000003}
   m_Layer: 0
   m_Name: XR Origin
   m_TagString: Untagged
@@ -213,6 +214,24 @@ MonoBehaviour:
   m_CameraFloorOffsetObject: {fileID: 162841977}
   m_RequestedTrackingOriginMode: 2
   m_CameraYOffset: 1.1176
+--- !u!114 &171000003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 121673474}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d28b34e15c99774cb8a9256c697281f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  xrOrigin: {fileID: 121673476}
+  playerBody: {fileID: 171000002}
+  inputActions: {fileID: -944628639613478452, guid: 5de1590bbafa3ff4b85fdd354d56480e, type: 3}
+  directionMode: 0
+  speed: 2
+  rotationSpeed: 90
 --- !u!4 &121673477
 Transform:
   m_ObjectHideFlags: 0
@@ -226,8 +245,40 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 162841978}
+  - {fileID: 171000002}
   m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &171000001
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 171000002}
+  m_Layer: 0
+  m_Name: Player Body
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &171000002
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 171000001}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 162841978}
+  m_Father: {fileID: 121673477}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &162841977
 GameObject:
@@ -261,7 +312,7 @@ Transform:
   - {fileID: 1323318534}
   - {fileID: 1385009902}
   - {fileID: 2126949392}
-  m_Father: {fileID: 121673477}
+  m_Father: {fileID: 171000002}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &330007978
 GameObject:

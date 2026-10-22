@@ -1,0 +1,54 @@
+{
+    "name": "ChimeralInput",
+    "maps": [
+        {
+            "name": "Chimeral Theater",
+            "id": "a1c4f0e2-3b57-4d8a-9f21-6c0e5d7b8a10",
+            "actions": [
+                {
+                    "name": "Move",
+                    "type": "Value",
+                    "id": "b2d5a1f3-4c68-5e9b-8f32-7d1f6e8c9b21",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                },
+                {
+                    "name": "Rotate",
+                    "type": "Value",
+                    "id": "d4f7c3b5-6e80-4a1b-8154-9f3b8a0d1e43",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": true
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "c3e6b2a4-5d79-6fac-9043-8e2a7f9d0c32",
+                    "path": "<XRController>{LeftHand}/{Primary2DAxis}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e5a8d4c6-7f91-4b2c-9265-0a4c9b1e2f54",
+                    "path": "<XRController>{RightHand}/{Primary2DAxis}",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Rotate",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
