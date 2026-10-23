@@ -31,8 +31,7 @@ namespace ChimeralTheater.UI
         [SerializeField] private Transform rightHand;
 
         [Header("Hand-following Settings")]
-        [SerializeField] private Vector3 handPositionOffset = new Vector3(0f, 0.15f, 0.25f);
-        [SerializeField] private float followSharpness = 8f;
+        [SerializeField] private FloatingUIFollower follower;
         [SerializeField] private float laserLength = 10f;
 
         private InputAction dashboardAction;
@@ -78,11 +77,13 @@ namespace ChimeralTheater.UI
         public Camera Hmd { get => hmd; set => hmd = value; }
         public Transform LeftHand { get => leftHand; set => leftHand = value; }
         public Transform RightHand { get => rightHand; set => rightHand = value; }
+        public FloatingUIFollower Follower { get => follower; set => follower = value; }
 
         private void Awake()
         {
             ResolveReferences();
             ResolveInputActions();
+            EnsureFollower();
             EnsureLaserMaterial();
             InitializeUI();
         }
@@ -296,31 +297,23 @@ namespace ChimeralTheater.UI
             return false;
         }
 
-        private Vector3 CalculateDashboardTargetPosition()
+        private void EnsureFollower()
         {
-            Vector3 handPos = GetLeftHandWorldPosition();
-            if (hmd == null)
-                return handPos + handPositionOffset;
+            // The panel itself carries the follow behaviour; make sure it exists and points at
+            // the HMD as the viewer, so any floating panel built the same way shares the movement.
+            if (follower == null && panel != null)
+                follower = panel.GetComponent<FloatingUIFollower>() ?? panel.AddComponent<FloatingUIFollower>();
 
-            Vector3 forwardOffset = hmd.transform.forward * handPositionOffset.z;
-            Vector3 upwardOffset = Vector3.up * handPositionOffset.y;
-            Vector3 rightOffset = hmd.transform.right * handPositionOffset.x;
-            return handPos + forwardOffset + upwardOffset + rightOffset;
+            if (follower != null)
+                follower.Viewer = hmd != null ? hmd.transform : null;
         }
 
         private void UpdateDashboardPosition()
         {
-            if (panel == null || hmd == null)
+            if (follower == null || panel == null)
                 return;
 
-            Vector3 targetPosition = CalculateDashboardTargetPosition();
-            panel.transform.position = Vector3.Lerp(panel.transform.position, targetPosition, Time.deltaTime * followSharpness);
-
-            Vector3 toPanel = panel.transform.position - hmd.transform.position;
-            if (toPanel.sqrMagnitude > 0.0001f)
-            {
-                panel.transform.rotation = Quaternion.LookRotation(toPanel, Vector3.up);
-            }
+            follower.Follow(GetLeftHandWorldPosition(), Time.deltaTime);
         }
 
         private void UpdateLaserAndPointer()
@@ -477,16 +470,8 @@ namespace ChimeralTheater.UI
 
             if (isOpen)
             {
-                if (panel != null)
-                {
-                    panel.transform.position = CalculateDashboardTargetPosition();
-                    if (hmd != null)
-                    {
-                        Vector3 toPanel = panel.transform.position - hmd.transform.position;
-                        if (toPanel.sqrMagnitude > 0.0001f)
-                            panel.transform.rotation = Quaternion.LookRotation(toPanel, Vector3.up);
-                    }
-                }
+                if (follower != null)
+                    follower.Snap(GetLeftHandWorldPosition());
             }
             else
             {

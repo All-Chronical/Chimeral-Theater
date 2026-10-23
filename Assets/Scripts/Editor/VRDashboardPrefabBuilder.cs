@@ -70,6 +70,11 @@ namespace ChimeralTheater.Editor
             bg.color = new Color(0.1f, 0.11f, 0.13f, 0.95f);
             bg.raycastTarget = true;
 
+            // Floating panel behaviour shared by every head/hand-following panel
+            FloatingUIFollower follower = panel.AddComponent<FloatingUIFollower>();
+            follower.AnchorOffset = new Vector3(0f, 0.15f, 0.25f);
+            follower.FollowSharpness = 8f;
+
             // Header Title
             GameObject titleObj = new GameObject("Title", typeof(RectTransform), typeof(Text));
             titleObj.transform.SetParent(panel.transform, false);
@@ -147,6 +152,7 @@ namespace ChimeralTheater.Editor
             dash.RotationSlider = rotationSlider;
             dash.LocomotionValueText = locoValText;
             dash.RotationValueText = rotValText;
+            dash.Follower = follower;
 
             // Visuals start disabled
             panel.SetActive(false);
