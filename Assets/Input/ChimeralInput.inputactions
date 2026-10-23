@@ -5,48 +5,23 @@
             "name": "Chimeral Theater",
             "id": "a1c4f0e2-3b57-4d8a-9f21-6c0e5d7b8a10",
             "actions": [
-                {
-                    "name": "Move",
-                    "type": "Value",
-                    "id": "b2d5a1f3-4c68-5e9b-8f32-7d1f6e8c9b21",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                },
-                {
-                    "name": "Rotate",
-                    "type": "Value",
-                    "id": "d4f7c3b5-6e80-4a1b-8154-9f3b8a0d1e43",
-                    "expectedControlType": "Vector2",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": true
-                }
+                { "name": "Move", "type": "Value", "id": "b2d5a1f3-4c68-5e9b-8f32-7d1f6e8c9b21", "expectedControlType": "Vector2", "processors": "", "interactions": "", "initialStateCheck": true },
+                { "name": "Rotate", "type": "Value", "id": "d4f7c3b5-6e80-4a1b-8154-9f3b8a0d1e43", "expectedControlType": "Vector2", "processors": "", "interactions": "", "initialStateCheck": true },
+                { "name": "DashboardToggle", "type": "Button", "id": "8a2c1f70-1c2e-4b59-9a31-7d2e5f8b0c41", "expectedControlType": "Button", "processors": "", "interactions": "", "initialStateCheck": false },
+                { "name": "UIInteract", "type": "Button", "id": "9b3d2a81-2d3f-4c60-ab42-8e3f6a9c1d52", "expectedControlType": "Button", "processors": "", "interactions": "", "initialStateCheck": false },
+                { "name": "LeftHandPosition", "type": "Value", "id": "ac4e3b92-3e40-4d71-bc53-9f407bad2e63", "expectedControlType": "Vector3", "processors": "", "interactions": "", "initialStateCheck": true },
+                { "name": "RightHandPosition", "type": "Value", "id": "bd5f4ca3-4f51-4e82-cd64-a0518cbe3f74", "expectedControlType": "Vector3", "processors": "", "interactions": "", "initialStateCheck": true },
+                { "name": "RightHandRotation", "type": "Value", "id": "ce605db4-5062-4f93-de75-b1629dcf4085", "expectedControlType": "Quaternion", "processors": "", "interactions": "", "initialStateCheck": true }
             ],
             "bindings": [
-                {
-                    "name": "",
-                    "id": "c3e6b2a4-5d79-6fac-9043-8e2a7f9d0c32",
-                    "path": "<XRController>{LeftHand}/{Primary2DAxis}",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Move",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "e5a8d4c6-7f91-4b2c-9265-0a4c9b1e2f54",
-                    "path": "<XRController>{RightHand}/{Primary2DAxis}",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": "",
-                    "action": "Rotate",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                }
+                { "name": "", "id": "c3e6b2a4-5d79-6fac-9043-8e2a7f9d0c32", "path": "<XRController>{LeftHand}/{Primary2DAxis}", "interactions": "", "processors": "", "groups": "", "action": "Move", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "e5a8d4c6-7f91-4b2c-9265-0a4c9b1e2f54", "path": "<XRController>{RightHand}/{Primary2DAxis}", "interactions": "", "processors": "", "groups": "", "action": "Rotate", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "d16a6ec5-6173-40a4-ef86-c2730ed04a96", "path": "<XRController>{LeftHand}/primaryButton", "interactions": "", "processors": "", "groups": "", "action": "DashboardToggle", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "e27b7fd6-7284-41b5-f097-d3841fe15ba7", "path": "<XRController>{RightHand}/triggerPressed", "interactions": "", "processors": "", "groups": "", "action": "UIInteract", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "a27b7fd6-7284-41b5-f097-d3841fe15ba8", "path": "<XRController>{RightHand}/trigger", "interactions": "Press", "processors": "", "groups": "", "action": "UIInteract", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "f38c80e7-8395-42c6-01a8-e4952af26cb", "path": "<XRController>{LeftHand}/devicePosition", "interactions": "", "processors": "", "groups": "", "action": "LeftHandPosition", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "049d91f8-94a6-43d7-12b9-f5a603b37dc", "path": "<XRController>{RightHand}/devicePosition", "interactions": "", "processors": "", "groups": "", "action": "RightHandPosition", "isComposite": false, "isPartOfComposite": false },
+                { "name": "", "id": "15aea209-a5b7-44e8-23ca-06b714b48ed", "path": "<XRController>{RightHand}/deviceRotation", "interactions": "", "processors": "", "groups": "", "action": "RightHandRotation", "isComposite": false, "isPartOfComposite": false }
             ]
         }
     ],
