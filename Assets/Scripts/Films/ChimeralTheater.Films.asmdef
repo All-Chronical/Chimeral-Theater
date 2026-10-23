@@ -1,0 +1,16 @@
+{
+    "name": "ChimeralTheater.Films",
+    "rootNamespace": "ChimeralTheater.Films",
+    "references": [
+        "UniRes.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
