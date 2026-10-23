@@ -1,3 +1,4 @@
+using ChimeralTheater.Films;
 using ChimeralTheater.Locomotion;
 using ChimeralTheater.UI;
 using UnityEditor;
@@ -37,8 +38,44 @@ namespace ChimeralTheater.Editor
             {
                 prefab = CreatePrefab();
             }
+            else if (IsPrefabStale(prefab))
+            {
+                // The prefab predates the films UI or the floating follower: rebuild it at the
+                // same path so the asset guid stays put, then replace the scene instance so no
+                // stale overrides survive.
+                prefab = CreatePrefab();
+                ReplaceSceneInstance(prefab);
+            }
 
             SetupSceneInstance(prefab);
+        }
+
+        private static bool IsPrefabStale(GameObject prefab)
+        {
+            if (prefab.GetComponent<VRDashboard>() == null)
+                return true;
+
+            if (prefab.GetComponentInChildren<FloatingUIFollower>(true) == null)
+                return true;
+
+            if (prefab.GetComponentInChildren<FilmsPanel>(true) == null)
+                return true;
+
+            return false;
+        }
+
+        private static void ReplaceSceneInstance(GameObject prefab)
+        {
+            Scene scene = SceneManager.GetActiveScene();
+            if (!scene.isLoaded || string.IsNullOrEmpty(scene.path))
+                return;
+
+            VRDashboard existing = Object.FindFirstObjectByType<VRDashboard>();
+            if (existing != null)
+            {
+                Object.DestroyImmediate(existing.gameObject);
+                EditorSceneManager.MarkSceneDirty(scene);
+            }
         }
 
         public static GameObject CreatePrefab()
@@ -115,6 +152,8 @@ namespace ChimeralTheater.Editor
             filmsRect.offsetMin = new Vector2(40f, 0f);
             filmsRect.offsetMax = new Vector2(-40f, 0f);
             filmsContent.SetActive(false);
+
+            FilmsPanel filmsPanel = BuildFilmsUI(filmsContent.transform, font);
 
             // Bottom Tabs
             float buttonWidth = 400f;
@@ -308,6 +347,309 @@ namespace ChimeralTheater.Editor
             return button;
         }
 
+        private static FilmsPanel BuildFilmsUI(Transform filmsContent, Font font)
+        {
+            // The panel script rides on the Films Content object itself.
+            FilmsPanel films = filmsContent.gameObject.AddComponent<FilmsPanel>();
+
+            // --- Takes view: scroll list of take rows plus an add button ---
+            GameObject takesView = new GameObject("Takes View", typeof(RectTransform));
+            takesView.transform.SetParent(filmsContent, false);
+            Stretch(takesView.GetComponent<RectTransform>());
+
+            RectTransform takesViewport;
+            BuildScrollList(takesView.transform, "Takes List", font, out takesViewport);
+
+            GameObject takeTemplate = BuildTakeRowTemplate(takesViewport, font);
+            GameObject addTake = BuildAddButton(takesView.transform, font, out Image _);
+            films.TakesView = takesView;
+            films.TakesListContent = takesViewport;
+            films.TakeRowTemplate = takeTemplate;
+            films.AddTakeButton = addTake.GetComponent<Button>();
+
+            // --- Take detail view: back, title, act rows, record and play ---
+            GameObject detailView = new GameObject("Take Detail View", typeof(RectTransform));
+            detailView.transform.SetParent(filmsContent, false);
+            Stretch(detailView.GetComponent<RectTransform>());
+
+            Button back = BuildPlainButton(detailView.transform, "Back", font,
+                new Vector2(0f, 1f), new Vector2(140f, 60f), new Vector2(0f, 1f), new Vector2(-30f, -10f));
+
+            GameObject titleObj = new GameObject("Take Title", typeof(RectTransform), typeof(Text));
+            titleObj.transform.SetParent(detailView.transform, false);
+            RectTransform titleRect = titleObj.GetComponent<RectTransform>();
+            titleRect.anchorMin = new Vector2(0f, 1f);
+            titleRect.anchorMax = new Vector2(1f, 1f);
+            titleRect.pivot = new Vector2(0.5f, 1f);
+            titleRect.sizeDelta = new Vector2(0f, 60f);
+            titleRect.anchoredPosition = new Vector2(0f, -10f);
+
+            Text title = titleObj.GetComponent<Text>();
+            title.text = "Take 1";
+            title.font = font;
+            title.fontSize = 30;
+            title.fontStyle = FontStyle.Bold;
+            title.color = Color.white;
+            title.alignment = TextAnchor.MiddleCenter;
+            title.raycastTarget = false;
+            films.TakeTitleText = title;
+
+            RectTransform actsViewport;
+            GameObject actsListRoot = BuildScrollList(detailView.transform, "Acts List", font, out actsViewport);
+            // Leave room at the bottom for the record and play buttons.
+            RectTransform actsRootRect = actsListRoot.GetComponent<RectTransform>();
+            actsRootRect.anchorMax = new Vector2(1f, 0.82f);
+
+            GameObject actTemplate = BuildActRowTemplate(actsViewport, font);
+            GameObject addAct = BuildAddButton(detailView.transform, font, out Image _);
+
+            Button record = BuildPlainButton(detailView.transform, "Record", font,
+                new Vector2(0f, 0f), new Vector2(240f, 70f), new Vector2(0f, 0f), new Vector2(30f, 10f));
+            Button play = BuildPlainButton(detailView.transform, "Play", font,
+                new Vector2(1f, 0f), new Vector2(240f, 70f), new Vector2(1f, 0f), new Vector2(-30f, 10f));
+
+            films.TakeDetailView = detailView;
+            films.ActsListContent = actsViewport;
+            films.ActRowTemplate = actTemplate;
+            films.AddActButton = addAct.GetComponent<Button>();
+            films.BackButton = back;
+            films.RecordButton = record;
+            films.PlayButton = play;
+
+            // --- Recording view: one giant stop button ---
+            GameObject recordingView = new GameObject("Recording View", typeof(RectTransform));
+            recordingView.transform.SetParent(filmsContent, false);
+            Stretch(recordingView.GetComponent<RectTransform>());
+
+            Button stop = BuildPlainButton(recordingView.transform, "STOP RECORDING", font,
+                Vector2.zero, Vector2.zero, new Vector2(0.5f, 0.5f), Vector2.zero);
+            RectTransform stopRect = stop.GetComponent<RectTransform>();
+            stopRect.anchorMin = new Vector2(0.1f, 0.1f);
+            stopRect.anchorMax = new Vector2(0.9f, 0.9f);
+            Image stopImage = stop.GetComponent<Image>();
+            stopImage.color = new Color(0.85f, 0.15f, 0.15f, 0.95f);
+
+            films.RecordingView = recordingView;
+            films.StopRecordingButton = stop;
+
+            // Wire the panel to the director that the scene setup creates.
+            films.Director = Object.FindFirstObjectByType<FilmDirector>();
+
+            // The detail and recording views start hidden; the panel shows the right one itself.
+            detailView.SetActive(false);
+            recordingView.SetActive(false);
+
+            return films;
+        }
+
+        private static GameObject BuildScrollList(Transform parent, string name, Font font, out RectTransform viewport)
+        {
+            GameObject listRoot = new GameObject(name, typeof(RectTransform), typeof(ScrollRect));
+            listRoot.transform.SetParent(parent, false);
+            RectTransform listRect = listRoot.GetComponent<RectTransform>();
+            Stretch(listRect);
+
+            // Right-side scrollbar
+            GameObject barObject = new GameObject("Scrollbar", typeof(RectTransform), typeof(Image), typeof(Scrollbar));
+            barObject.transform.SetParent(listRoot.transform, false);
+            RectTransform barRect = barObject.GetComponent<RectTransform>();
+            barRect.anchorMin = new Vector2(1f, 0f);
+            barRect.anchorMax = new Vector2(1f, 1f);
+            barRect.pivot = new Vector2(1f, 0.5f);
+            barRect.sizeDelta = new Vector2(30f, 0f);
+
+            Image barImage = barObject.GetComponent<Image>();
+            barImage.color = new Color(0.15f, 0.16f, 0.18f, 0.9f);
+            barImage.raycastTarget = true;
+
+            GameObject slidingArea = new GameObject("Sliding Area", typeof(RectTransform));
+            slidingArea.transform.SetParent(barObject.transform, false);
+            RectTransform slidingRect = slidingArea.GetComponent<RectTransform>();
+            slidingRect.anchorMin = Vector2.zero;
+            slidingRect.anchorMax = Vector2.one;
+            slidingRect.offsetMin = new Vector2(4f, 4f);
+            slidingRect.offsetMax = new Vector2(-4f, -4f);
+
+            GameObject handle = new GameObject("Handle", typeof(RectTransform), typeof(Image));
+            handle.transform.SetParent(slidingArea.transform, false);
+            Stretch(handle.GetComponent<RectTransform>());
+            Image handleImage = handle.GetComponent<Image>();
+            handleImage.color = new Color(0.4f, 0.42f, 0.48f, 1f);
+            handleImage.raycastTarget = true;
+
+            Scrollbar bar = barObject.GetComponent<Scrollbar>();
+            bar.targetGraphic = handleImage;
+            bar.handleRect = handle.GetComponent<RectTransform>();
+            bar.direction = Scrollbar.Direction.BottomToTop;
+
+            // Viewport with content rows
+            GameObject viewportObject = new GameObject("Viewport", typeof(RectTransform), typeof(Image));
+            viewportObject.transform.SetParent(listRoot.transform, false);
+            RectTransform viewportRect = viewportObject.GetComponent<RectTransform>();
+            viewportRect.anchorMin = new Vector2(0f, 0f);
+            viewportRect.anchorMax = new Vector2(1f, 1f);
+            viewportRect.pivot = new Vector2(0f, 1f);
+            viewportRect.offsetMin = new Vector2(0f, 0f);
+            viewportRect.offsetMax = new Vector2(-30f, 0f);
+            Image viewportImage = viewportObject.GetComponent<Image>();
+            viewportImage.color = new Color(0.08f, 0.09f, 0.11f, 0.8f);
+            viewportImage.raycastTarget = true;
+
+            GameObject content = new GameObject("Content", typeof(RectTransform), typeof(VerticalLayoutGroup), typeof(ContentSizeFitter));
+            content.transform.SetParent(viewportObject.transform, false);
+            RectTransform contentRect = content.GetComponent<RectTransform>();
+            contentRect.anchorMin = new Vector2(0f, 1f);
+            contentRect.anchorMax = new Vector2(1f, 1f);
+            contentRect.pivot = new Vector2(0.5f, 1f);
+            contentRect.sizeDelta = new Vector2(0f, 0f);
+
+            VerticalLayoutGroup layout = content.GetComponent<VerticalLayoutGroup>();
+            layout.spacing = 8f;
+            layout.padding = new RectOffset(10, 10, 10, 10);
+            layout.childControlWidth = true;
+            layout.childControlHeight = true;
+            layout.childForceExpandWidth = true;
+            layout.childForceExpandHeight = false;
+
+            ContentSizeFitter fitter = content.GetComponent<ContentSizeFitter>();
+            fitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
+            fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            ScrollRect scroll = listRoot.GetComponent<ScrollRect>();
+            scroll.content = contentRect;
+            scroll.viewport = viewportRect;
+            scroll.verticalScrollbar = bar;
+            scroll.horizontal = false;
+            scroll.vertical = true;
+            scroll.scrollSensitivity = 20f;
+
+            viewport = contentRect;
+            return listRoot;
+        }
+
+        private static GameObject BuildTakeRowTemplate(RectTransform content, Font font)
+        {
+            GameObject row = new GameObject("Take Row Template", typeof(RectTransform), typeof(Image), typeof(Button));
+            row.transform.SetParent(content, false);
+            LayoutElement layout = row.AddComponent<LayoutElement>();
+            layout.minHeight = 64f;
+            layout.preferredHeight = 64f;
+
+            Image background = row.GetComponent<Image>();
+            background.color = new Color(0.2f, 0.2f, 0.22f, 0.95f);
+            background.raycastTarget = true;
+
+            Button button = row.GetComponent<Button>();
+            button.transition = Selectable.Transition.None;
+
+            GameObject textObj = new GameObject("Label", typeof(RectTransform), typeof(Text));
+            textObj.transform.SetParent(row.transform, false);
+            Stretch(textObj.GetComponent<RectTransform>());
+            Text label = textObj.GetComponent<Text>();
+            label.text = "Take 1";
+            label.font = font;
+            label.fontSize = 26;
+            label.color = Color.white;
+            label.alignment = TextAnchor.MiddleCenter;
+            label.raycastTarget = false;
+
+            row.SetActive(false); // template rows stay hidden until the panel clones them
+            return row;
+        }
+
+        private static GameObject BuildActRowTemplate(RectTransform content, Font font)
+        {
+            GameObject row = new GameObject("Act Row Template", typeof(RectTransform), typeof(Image), typeof(Button));
+            row.transform.SetParent(content, false);
+            LayoutElement layout = row.AddComponent<LayoutElement>();
+            layout.minHeight = 64f;
+            layout.preferredHeight = 64f;
+
+            Image background = row.GetComponent<Image>();
+            background.color = new Color(0.2f, 0.2f, 0.22f, 0.95f);
+            background.raycastTarget = true;
+
+            Button button = row.GetComponent<Button>();
+            button.transition = Selectable.Transition.None;
+
+            GameObject textObj = new GameObject("Label", typeof(RectTransform), typeof(Text));
+            textObj.transform.SetParent(row.transform, false);
+            RectTransform textRect = textObj.GetComponent<RectTransform>();
+            textRect.anchorMin = Vector2.zero;
+            textRect.anchorMax = new Vector2(1f, 1f);
+            textRect.offsetMax = new Vector2(-80f, 0f);
+            Text label = textObj.GetComponent<Text>();
+            label.text = "Act 1";
+            label.font = font;
+            label.fontSize = 26;
+            label.color = Color.white;
+            label.alignment = TextAnchor.MiddleLeft;
+            label.raycastTarget = false;
+
+            // Per-row delete button on the right edge
+            GameObject deleteObj = new GameObject("Delete", typeof(RectTransform), typeof(Image), typeof(Button));
+            deleteObj.transform.SetParent(row.transform, false);
+            RectTransform deleteRect = deleteObj.GetComponent<RectTransform>();
+            deleteRect.anchorMin = new Vector2(1f, 0.5f);
+            deleteRect.anchorMax = new Vector2(1f, 0.5f);
+            deleteRect.pivot = new Vector2(1f, 0.5f);
+            deleteRect.sizeDelta = new Vector2(64f, 64f);
+            deleteRect.anchoredPosition = new Vector2(0f, 0f);
+
+            Image deleteImage = deleteObj.GetComponent<Image>();
+            deleteImage.color = new Color(0.5f, 0.15f, 0.15f, 0.9f);
+            deleteImage.raycastTarget = true;
+
+            Button deleteButton = deleteObj.GetComponent<Button>();
+            deleteButton.transition = Selectable.Transition.None;
+
+            GameObject deleteText = new GameObject("Label", typeof(RectTransform), typeof(Text));
+            deleteText.transform.SetParent(deleteObj.transform, false);
+            Stretch(deleteText.GetComponent<RectTransform>());
+            Text deleteLabel = deleteText.GetComponent<Text>();
+            deleteLabel.text = "X";
+            deleteLabel.font = font;
+            deleteLabel.fontSize = 28;
+            deleteLabel.color = Color.white;
+            deleteLabel.alignment = TextAnchor.MiddleCenter;
+            deleteLabel.raycastTarget = false;
+
+            row.SetActive(false);
+            return row;
+        }
+
+        private static GameObject BuildAddButton(Transform parent, Font font, out Image image)
+        {
+            GameObject button = new GameObject("Add Button", typeof(RectTransform), typeof(Image), typeof(Button));
+            button.transform.SetParent(parent, false);
+            RectTransform rect = button.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(1f, 0f);
+            rect.anchorMax = new Vector2(1f, 0f);
+            rect.pivot = new Vector2(1f, 0f);
+            rect.anchoredPosition = new Vector2(-20f, 10f);
+            rect.sizeDelta = new Vector2(160f, 60f);
+
+            image = button.GetComponent<Image>();
+            image.color = new Color(0.2f, 0.45f, 0.25f, 0.95f);
+            image.raycastTarget = true;
+
+            Button add = button.GetComponent<Button>();
+            add.transition = Selectable.Transition.None;
+
+            GameObject textObj = new GameObject("Label", typeof(RectTransform), typeof(Text));
+            textObj.transform.SetParent(button.transform, false);
+            Stretch(textObj.GetComponent<RectTransform>());
+            Text label = textObj.GetComponent<Text>();
+            label.text = "+ Add";
+            label.font = font;
+            label.fontSize = 26;
+            label.color = Color.white;
+            label.alignment = TextAnchor.MiddleCenter;
+            label.raycastTarget = false;
+
+            return button;
+        }
+
         private static void Stretch(RectTransform rect)
         {
             rect.anchorMin = Vector2.zero;
@@ -316,7 +658,41 @@ namespace ChimeralTheater.Editor
             rect.offsetMax = Vector2.zero;
         }
 
-        private static void SetupSceneInstance(GameObject prefab)
+        private static Button BuildPlainButton(Transform parent, string label, Font font,
+            Vector2 anchorMin, Vector2 size, Vector2 pivot, Vector2 anchoredPosition)
+        {
+            GameObject buttonObj = new GameObject(label + " Button", typeof(RectTransform), typeof(Image), typeof(Button));
+            buttonObj.transform.SetParent(parent, false);
+
+            RectTransform rect = buttonObj.GetComponent<RectTransform>();
+            rect.anchorMin = anchorMin;
+            rect.anchorMax = anchorMin;
+            rect.pivot = pivot;
+            rect.sizeDelta = size;
+            rect.anchoredPosition = anchoredPosition;
+
+            Image image = buttonObj.GetComponent<Image>();
+            image.color = new Color(0.2f, 0.2f, 0.22f, 0.95f);
+            image.raycastTarget = true;
+
+            Button button = buttonObj.GetComponent<Button>();
+            button.transition = Selectable.Transition.None;
+
+            GameObject textObj = new GameObject(label + " Text", typeof(RectTransform), typeof(Text));
+            textObj.transform.SetParent(buttonObj.transform, false);
+            Stretch(textObj.GetComponent<RectTransform>());
+            Text text = textObj.GetComponent<Text>();
+            text.text = label;
+            text.font = font;
+            text.fontSize = 28;
+            text.color = Color.white;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.raycastTarget = false;
+
+            return button;
+        }
+
+        public static void SetupSceneInstance(GameObject prefab)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isPlaying)
                 return;

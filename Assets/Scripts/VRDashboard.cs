@@ -406,19 +406,11 @@ namespace ChimeralTheater.UI
             if (!isOpen || !isPointerOnPanel)
                 return;
 
-            // Click Settings Tab
-            if (IsHitInRect(settingsTabRect, currentPanelHitPoint))
-            {
-                SelectTab(0);
+            // Any active button under the pointer gets its onClick invoked; the topmost hit
+            // wins so a per-row delete button beats its own row button. Tab buttons are wired
+            // through onClick too, so this covers every clickable in the panel.
+            if (DispatchButtonClick(currentPanelHitPoint))
                 return;
-            }
-
-            // Click Films Tab
-            if (IsHitInRect(filmsTabRect, currentPanelHitPoint))
-            {
-                SelectTab(1);
-                return;
-            }
 
             // Click or start dragging Locomotion Slider
             if (selectedTab == 0 && IsHitInRect(locomotionSliderRect, currentPanelHitPoint))
@@ -435,6 +427,55 @@ namespace ChimeralTheater.UI
                 UpdateSliderFromHit(rotationSlider, currentPanelHitPoint);
                 return;
             }
+        }
+
+        /// <summary>Invokes the topmost interactable button containing the hit point. Returns
+        /// false when no button was under the pointer.</summary>
+        private bool DispatchButtonClick(Vector3 worldHitPoint)
+        {
+            if (panel == null)
+                return false;
+
+            Button[] buttons = panel.GetComponentsInChildren<Button>(false);
+            Button best = null;
+            int bestDepth = int.MinValue;
+
+            foreach (Button button in buttons)
+            {
+                if (button == null || !button.IsActive() || !button.interactable)
+                    continue;
+
+                RectTransform rect = button.GetComponent<RectTransform>();
+                if (rect == null || !IsHitInRect(rect, worldHitPoint))
+                    continue;
+
+                // Depth in the hierarchy decides which overlapping button wins: a delete X on
+                // top of a row button is deeper in the hierarchy and wins the click.
+                int depth = GetHierarchyDepth(button.transform);
+                if (depth > bestDepth)
+                {
+                    best = button;
+                    bestDepth = depth;
+                }
+            }
+
+            if (best == null)
+                return false;
+
+            best.onClick.Invoke();
+            return true;
+        }
+
+        private static int GetHierarchyDepth(Transform transform)
+        {
+            int depth = 0;
+            while (transform.parent != null)
+            {
+                depth++;
+                transform = transform.parent;
+            }
+
+            return depth;
         }
 
         private void EndInteraction(InputAction.CallbackContext context)
@@ -461,6 +502,17 @@ namespace ChimeralTheater.UI
 
             Vector3 local = rect.InverseTransformPoint(worldPoint);
             return rect.rect.Contains(new Vector2(local.x, local.y));
+        }
+
+        /// <summary>Open or close the dashboard from code. Closing clears the pointer.</summary>
+        public void Close()
+        {
+            if (!isOpen)
+                return;
+
+            isOpen = false;
+            SetVisualsActive(false);
+            ClearPointer();
         }
 
         private void ToggleDashboard(InputAction.CallbackContext context)

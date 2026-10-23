@@ -1,3 +1,4 @@
+using ChimeralTheater.Films;
 using ChimeralTheater.UI;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -104,7 +105,7 @@ namespace ChimeralTheater.Editor
             return savedPrefab;
         }
 
-        private static void SetupSceneInstance(GameObject prefab)
+        public static void SetupSceneInstance(GameObject prefab)
         {
             if (EditorApplication.isPlayingOrWillChangePlaymode || EditorApplication.isPlaying)
                 return;
@@ -113,13 +114,26 @@ namespace ChimeralTheater.Editor
             if (!scene.isLoaded || string.IsNullOrEmpty(scene.path))
                 return;
 
-            // The HUD binds to the director at runtime; the scene instance only needs to exist.
+            // The director runs the recording session; create it once so both the films panel
+            // and the HUD can find it in the scene.
+            FilmDirector director = Object.FindFirstObjectByType<FilmDirector>();
+            if (director == null)
+            {
+                GameObject directorObject = new GameObject("FilmDirector");
+                director = directorObject.AddComponent<FilmDirector>();
+                EditorSceneManager.MarkSceneDirty(scene);
+            }
+
             RecordingHUD sceneHud = Object.FindFirstObjectByType<RecordingHUD>();
             if (sceneHud == null && prefab != null)
             {
                 GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab, scene);
                 instance.name = "RecordingHUD";
                 EditorSceneManager.MarkSceneDirty(scene);
+            }
+
+            if (scene.isDirty)
+            {
                 EditorSceneManager.SaveScene(scene);
                 Debug.Log("[RecordingHUDPrefabBuilder] Added RecordingHUD instance to scene.");
             }
