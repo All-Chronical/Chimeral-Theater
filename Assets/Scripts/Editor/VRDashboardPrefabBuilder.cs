@@ -316,7 +316,7 @@ namespace ChimeralTheater.Editor
                 return;
 
             Scene scene = SceneManager.GetActiveScene();
-            if (!scene.isLoaded)
+            if (!scene.isLoaded || string.IsNullOrEmpty(scene.path))
                 return;
 
             // Remove any VRDashboard script from XR Origin if present
