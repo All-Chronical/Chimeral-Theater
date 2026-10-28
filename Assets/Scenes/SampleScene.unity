@@ -1194,6 +1194,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 54886258374167707, guid: bd4eb1c0f35e1a947959d93f7dc9107b, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1195561448243402580, guid: bd4eb1c0f35e1a947959d93f7dc9107b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -1234,6 +1238,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2464072746153172860, guid: bd4eb1c0f35e1a947959d93f7dc9107b, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3441982003141051976, guid: bd4eb1c0f35e1a947959d93f7dc9107b, type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4015339192151834986, guid: bd4eb1c0f35e1a947959d93f7dc9107b, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5720016583807413786, guid: bd4eb1c0f35e1a947959d93f7dc9107b, type: 3}
       propertyPath: hmd
       value: 
@@ -1254,9 +1270,21 @@ PrefabInstance:
       propertyPath: inputActions
       value: 
       objectReference: {fileID: -944628639613478452, guid: 5de1590bbafa3ff4b85fdd354d56480e, type: 3}
+    - target: {fileID: 6322218956312223599, guid: bd4eb1c0f35e1a947959d93f7dc9107b, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7315521105570107753, guid: bd4eb1c0f35e1a947959d93f7dc9107b, type: 3}
       propertyPath: m_Name
       value: VRDashboard
+      objectReference: {fileID: 0}
+    - target: {fileID: 9188253643428943414, guid: bd4eb1c0f35e1a947959d93f7dc9107b, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9188253643428943414, guid: bd4eb1c0f35e1a947959d93f7dc9107b, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

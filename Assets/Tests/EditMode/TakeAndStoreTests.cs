@@ -75,7 +75,16 @@ namespace ChimeralTheater.Films.Tests
 
             ActStore.Save(take, act);
 
-            Assert.IsTrue(File.Exists(ResourcePaths.ToFileSystemPath("user://films/take_2/act_1.chact")));
+            string savedFile = ResourcePaths.ToFileSystemPath("user://films/take_2/act_1.chact");
+            Assert.IsTrue(File.Exists(savedFile));
+            byte[] fileBytes = File.ReadAllBytes(savedFile);
+            Assert.GreaterOrEqual(fileBytes.Length, 5);
+            Assert.AreEqual((byte)'U', fileBytes[0]);
+            Assert.AreEqual((byte)'N', fileBytes[1]);
+            Assert.AreEqual((byte)'R', fileBytes[2]);
+            Assert.AreEqual((byte)'E', fileBytes[3]);
+            Assert.AreEqual((byte)'S', fileBytes[4]);
+
             Assert.IsFalse(act.HasFramesLoaded);
             Assert.AreEqual(3, act.FrameCount);
             Assert.AreEqual("user://films/take_2/act_1.chact", act.ResourcePath);

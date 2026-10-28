@@ -17,10 +17,10 @@ namespace ChimeralTheater.Films
             return $"{Root}/take_{take.Number}/act_{act.Number}{ActExtension}";
         }
 
-        /// <summary>Writes the act's frames to its file, then releases them from memory.</summary>
+        /// <summary>Writes the act's frames to its file as a compact binary UniRes resource, then releases them from memory.</summary>
         public static void Save(Take take, Act act)
         {
-            ResourceSaver.Save(act, PathFor(take, act), SaveFlags.ChangePath);
+            ResourceSaver.Save(act, PathFor(take, act), SaveFlags.ChangePath | SaveFlags.Binary);
             act.ReleaseFrames();
         }
 
